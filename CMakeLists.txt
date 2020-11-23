@@ -24,6 +24,9 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 # link libraries
 target_link_libraries(${PROJECT_NAME} SDL2 SDL2main)
 
+# include directories
+target_include_directories(${PROJECT_NAME} PRIVATE "${PROJECT_SOURCE_DIR}/include")
+
 # set the default flags
 if ( CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang|GNU" )
     target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wunreachable-code -Wpedantic)

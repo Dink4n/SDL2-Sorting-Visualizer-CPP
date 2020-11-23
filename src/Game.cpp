@@ -1,129 +1,35 @@
-#include <SDL2/SDL.h>
+#include "Game.hpp"
 
-#include <iostream>
-#include <time.h>
+Game::Game()
+    : m_Window(NULL), m_Renderer(NULL), m_GameRunning(false)
+{}
 
-double HiresTimeInSeconds()
-{
-    return SDL_GetTicks() / 1000.0;
-}
-
-void Swap(int& a, int& b)
-{
-    int tmp = a;
-    a = b;
-    b = tmp;
-}
-
-void Swap(SDL_Rect& a, SDL_Rect& b)
-{
-    SDL_Rect tmp = a;
-    a = b;
-    b = tmp;
-}
-
-
-/* void bubble_sort(SDL_Renderer *renderer, int *array, int n) */
-/* { */
-/*     int i, j; */
-/*     for (i = 1; i < n; i++) { */
-/*         for (j = 0; j < n - 1; j++) { */
-/*             if (array[j] > array[j + 1]) { */
-/*                 Swap(&array[j], &array[j + 1]); */
-/*                 /1* render(renderer, array); *1/ */
-/*             } */
-/*         } */
-/*     } */
-/* } */
-
-int main()
+void Game::Init(const char* title, int width, int height)
 {
     if (SDL_Init(SDL_INIT_VIDEO) > 0)
         std::cerr << "SDL2_Init has Failed. Error: " << SDL_GetError() << std::endl;
 
-    SDL_Window* window = SDL_CreateWindow("Sorting Visualizer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_SHOWN);
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    m_Window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN);
 
-    bool gameRunning = true;
+    if (!m_Window)
+        std::cerr << "SDL2 cannot create the window. Error: " << SDL_GetError() << std::endl;
 
-    srand(time(NULL));
+    m_Renderer = SDL_CreateRenderer(m_Window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
-    /* Setup(); */
-    SDL_Rect rectangles[100];
-    for (int i = 0; i < 100; i++)
-    {
-        SDL_Rect rect;
-        rect.x = 8 * i;
-        rect.y = rand() % 600;
-        rect.w = 8;
-        rect.h = 600 - rect.y;
+    if (!m_Renderer)
+        std::cerr << "SDL2 cannot create the renderer. Error: " << SDL_GetError() << std::endl;
 
-        rectangles[i] = rect;
-    }
+    m_GameRunning = true;
+}
 
-    SDL_Event event;
-    while (gameRunning)
-    {
-        // Process Input
-        while (SDL_PollEvent(&event))
-        {
-            switch (event.type)
-            {
-                case SDL_QUIT:
-                    gameRunning = false;
-                    break;
-
-                case SDL_KEYDOWN:
-                    if (event.key.keysym.sym == SDLK_ESCAPE)
-                        gameRunning = false;
-
-                    if (event.key.keysym.sym == SDLK_r)
-                    {
-                        for (int i = 0; i < 100; i++)
-                        {
-                            SDL_Rect rect;
-                            rect.x = 8 * i;
-                            rect.y = rand() % 600;
-                            rect.w = 8;
-                            rect.h = 600 - rect.y;
-
-                            rectangles[i] = rect;
-                        }
-
-                    }
-
-                    break;
-            }
-        }
-
-        // Update
-        // Swap(rectangles[rand() % 100].x, rectangles[rand() % 50].x);
-
-        int i, j;
-        for (i = 0; i < 100 - 1; i++) {
-            for (j = 0; j < 100 - i - 1; j++) {
-                if (rectangles[j].h > rectangles[j + 1].h) {
-                    Swap(rectangles[j].x, rectangles[j + 1].x);
-                    Swap(rectangles[j], rectangles[j+1]);
-
-                    /* SDL_Delay(10); */
-
-                    // Render
-                    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-                    SDL_RenderClear(renderer);
-                    SDL_SetRenderDrawColor(renderer, 255, 255, 0, SDL_ALPHA_OPAQUE);
-
-                    for (const SDL_Rect& rect : rectangles)
-                    {
-                        SDL_RenderFillRect(renderer, &rect);
-                    }
-                    SDL_RenderPresent(renderer);
-                }
-            }
-        }
-    };
-
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
+void Game::CleanUp()
+{
+    SDL_DestroyRenderer(m_Renderer);
+    SDL_DestroyWindow(m_Window);
     SDL_Quit();
+}
+
+bool Game::IsRunning()
+{
+    return m_GameRunning;
 }
